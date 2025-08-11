@@ -6,6 +6,8 @@ import { useNavigate } from "react-router";
 import axios from "axios";
 import { BackendBaseUrl } from "../config/BackendBaseUrl";
 import PasswordInput from "../components/PasswordInput";
+import MainLayout from "../components/MainLayout";
+import LoadingSpinner from "../components/LoadingSpinner";
 
 export default function SignInPage() {
   const { login } = useMyContext();
@@ -28,19 +30,22 @@ export default function SignInPage() {
       navigate("/home");
     } catch (err) {
       console.log(err);
-      toast.error("Invalid username or password");
+    if (err.response && err.response.data && err.response.data.message) {
+        toast.error(err.response.data.message);
+      }
+      else if (err.request && !err.response) {
+        toast.error("Server error. Please try again later.");
+      }
+      else {
+        toast.error("Something went wrong. Please try again.");
+      }
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen w-full bg-gradient-to-br from-[#060b1a] via-[#0d1225] to-[#060b1a] text-white font-sans flex flex-col items-center justify-center px-4 relative overflow-hidden">
-      
-      {/* Animated glowing background orbs */}
-      <div className="absolute -top-16 -left-16 w-64 h-64 bg-blue-500 rounded-full mix-blend-screen filter blur-[100px] opacity-30 animate-pulse"></div>
-      <div className="absolute bottom-0 right-0 w-72 h-72 bg-purple-500 rounded-full mix-blend-screen filter blur-[100px] opacity-30 animate-pulse delay-300"></div>
-      
+    <MainLayout>
       <div className="bg-white/10 backdrop-blur-2xl border border-white/20 rounded-3xl p-10 max-w-md w-full shadow-2xl hover:shadow-purple-500/30 transition duration-500 transform hover:-translate-y-1">
         
         <button
@@ -79,33 +84,7 @@ export default function SignInPage() {
                 : "bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 hover:scale-[1.03] shadow-purple-500/30"
             }`}
           >
-            {loading ? (
-              <div className="flex items-center justify-center gap-2">
-                <svg
-                  className="animate-spin h-5 w-5 text-white"
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                >
-                  <circle
-                    className="opacity-25"
-                    cx="12"
-                    cy="12"
-                    r="10"
-                    stroke="currentColor"
-                    strokeWidth="4"
-                  ></circle>
-                  <path
-                    className="opacity-75"
-                    fill="currentColor"
-                    d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
-                  ></path>
-                </svg>
-                Signing In...
-              </div>
-            ) : (
-              "Sign In"
-            )}
+            {loading ? <LoadingSpinner label="Signing In..." /> : "Sign In"}
           </button>
         </form>
 
@@ -119,6 +98,6 @@ export default function SignInPage() {
           </button>
         </p>
       </div>
-    </div>
+    </MainLayout>
   );
 }
